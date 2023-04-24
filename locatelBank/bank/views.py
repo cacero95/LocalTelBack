@@ -79,10 +79,16 @@ def getAccountByEmail( request ):
 def addFounds( request ):
     try:
         body = json.loads( request.body )
+        print( body )
         account = Account.objects.get( number = body[ 'number' ] )
+        print( account )
         if account is not None:
+            value = account.amount
+            print( value )
+            print( body["amount"] )
             account.amount = account.amount + body[ "amount" ]
-            return { "status" : True, "message" : '' }
+            account.save()
+            return Response({ "status" : True, "message" : '' })
         return Response({ "status" : False, "message" : 'Account waas not found' })
     except Account.DoesNotExist:
         return Response({ "status" : False, "message" : "error" })
@@ -94,7 +100,9 @@ def takeOutAmount( request ):
         body = json.loads( request.body )
         account = Account.objects.get( number = body[ 'number' ] )
         if account is not None:
-            account.amount = account.amount - body[ "amount" ]
-            return { "status" : True, "message" : '' }
+            value = account.amount - body[ "amount" ]
+            account.amount = value if value > -1 else 0
+            account.save()
+            return Response({ "status" : True, "message" : '' })
     except Account.DoesNotExist:
         return Response({ "status" : False, "message" : "error" })
